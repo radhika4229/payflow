@@ -1,4 +1,4 @@
 package com.radhika.payflow.transaction.enums;
 
-public class TransactionStatus {
+public  enum TransactionStatus { PENDING,SUCCESS,FAILED
 }
