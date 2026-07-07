@@ -1,4 +1,12 @@
 package com.radhika.payflow.transaction.repository;
 
-public class TransactionRepository {
+import com.radhika.payflow.transaction.entity.Transaction;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface  TransactionRepository extends JpaRepository<Transaction, UUID> {
+
+    Optional<Transaction> findByIdempotencyKey(String idempotencyKey);
 }

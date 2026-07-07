@@ -1,4 +1,7 @@
 package com.radhika.payflow.common.exception;
 
-public class DuplicateRequestException {
+public class DuplicateRequestException extends RuntimeException {
+    public DuplicateRequestException(String message) {
+        super(message);
+    }
 }

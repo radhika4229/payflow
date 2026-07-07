@@ -1,5 +1,6 @@
 package com.radhika.payflow.auth.entity;
 
+import com.radhika.payflow.wallet.entity.Account;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.*;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Builder
-public class User {
+public class User extends Account {
     @Id
     @GeneratedValue(strategy= GenerationType.UUID)
     private UUID id;
