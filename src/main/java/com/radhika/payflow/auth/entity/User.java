@@ -36,11 +36,11 @@ public class User {
 
 
     @CreationTimestamp
-    @Column(name="created-at",updatable=false)
+    @Column(name="created_at",updatable=false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name="updated-at")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
 
