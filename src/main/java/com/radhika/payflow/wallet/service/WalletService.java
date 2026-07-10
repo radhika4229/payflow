@@ -62,9 +62,11 @@ Account lockedAccount = accountRepository.findByIdForUpdate(account.getId())
             .build();
 }
 
-private  Account getAccountOfCurrentUser(){
-    String email =securityUtil.getCurrentUserEmail();
-    User user = userRepository.findByEmail(email).orElseThrow(()->new ResourceNotFoundException("user not found"));
-    return accountRepository.findById(user.getId()).orElseThrow(()->new ResourceNotFoundException("account not found for this user"));
-}
+    private Account getAccountOfCurrentUser() {
+        String email = securityUtil.getCurrentUserEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return accountRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found for this user"));
+    }
 }

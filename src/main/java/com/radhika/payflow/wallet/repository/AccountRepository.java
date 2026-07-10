@@ -11,10 +11,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AccountRepository extends JpaRepository<Account, UUID> {
-    Optional<User> findByUserId(UUID userId);
+    Optional<Account> findByUserId(UUID userId);
 
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Account a WHERE a.id= :id")
     Optional<Account> findByIdForUpdate(UUID id);
+
+
 }
