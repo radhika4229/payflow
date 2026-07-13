@@ -13,11 +13,13 @@ import com.radhika.payflow.wallet.dto.BalanceResponse;
 import com.radhika.payflow.wallet.entity.Account;
 import com.radhika.payflow.wallet.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +29,22 @@ public class WalletService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final SecurityUtil securityUtil;
-
+    private final RedisTemplate<String, Object> redisTemplate;
+private static final String BALANCE_CACHE_PREFIX="balance:";
+private static final long CACHE_TTL_MINUTES=5;
 
 public BalanceResponse getBalance(){
     Account account = getAccountOfCurrentUser();
+    String cacheKey=BALANCE_CACHE_PREFIX + account.getId();
+    Object cachedBalance = redisTemplate.opsForValue().get(cacheKey);
+    if(cachedBalance!=null){
+        return BalanceResponse.builder()
+                .balance(new BigDecimal(cachedBalance.toString()))
+                .build();
+    }
+    BigDecimal balance = account.getBalance();
+    redisTemplate.opsForValue().set(cacheKey, balance.toString(), CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+
     return BalanceResponse.builder()
             .balance(account.getBalance())
             .build();
@@ -56,10 +70,14 @@ Account lockedAccount = accountRepository.findByIdForUpdate(account.getId())
          .idempotencyKey(idempotencyKey)
          .build();
     transactionRepository.save(transaction);
-
+invalidateBalanceCache(lockedAccount.getId());
     return BalanceResponse.builder()
             .balance(lockedAccount.getBalance())
             .build();
+}
+    public void invalidateBalanceCache(java.util.UUID accountId) {
+        String cacheKey = BALANCE_CACHE_PREFIX + accountId;
+        redisTemplate.delete(cacheKey);
 }
 
     private Account getAccountOfCurrentUser() {

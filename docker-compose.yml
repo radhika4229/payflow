@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:17
     container_name: payflow-postgres
@@ -18,6 +17,18 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: payflow-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: payflow-app
@@ -25,13 +36,17 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/payflow_db?options=-c%20timezone=Asia/Kolkata
+      DB_URL: "jdbc:postgresql://postgres:5432/payflow_db?options=-c%20timezone=Asia/Kolkata"
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       JWT_SECRET_KEY: qwertyuhjgfdeuekaweevfreghergfekhhgejgfewjgfghgjdheggheg
       JWT_EXPIRATION_MS: 86400000
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:

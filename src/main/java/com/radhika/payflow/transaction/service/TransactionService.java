@@ -12,6 +12,7 @@ import com.radhika.payflow.transaction.enums.TransactionType;
 import com.radhika.payflow.transaction.repository.TransactionRepository;
 import com.radhika.payflow.wallet.entity.Account;
 import com.radhika.payflow.wallet.repository.AccountRepository;
+import com.radhika.payflow.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -28,7 +29,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final SecurityUtil securityUtil;
-
+    private final WalletService walletService;
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void transfer(UUID receiverAccountId, BigDecimal amount, String idempotencyKey) {
 
@@ -78,5 +79,7 @@ public class TransactionService {
                 .idempotencyKey(idempotencyKey)
                 .build();
         transactionRepository.save(transaction);
+        walletService.invalidateBalanceCache(sender.getId());
+        walletService.invalidateBalanceCache(receiver.getId());
     }
 }
