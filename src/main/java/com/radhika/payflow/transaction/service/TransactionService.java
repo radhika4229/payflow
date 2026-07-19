@@ -9,6 +9,8 @@ import com.radhika.payflow.security.SecurityUtil;
 import com.radhika.payflow.transaction.entity.Transaction;
 import com.radhika.payflow.transaction.enums.TransactionStatus;
 import com.radhika.payflow.transaction.enums.TransactionType;
+import com.radhika.payflow.transaction.event.TransactionEvent;
+import com.radhika.payflow.transaction.event.TransactionEventProducer;
 import com.radhika.payflow.transaction.repository.TransactionRepository;
 import com.radhika.payflow.wallet.entity.Account;
 import com.radhika.payflow.wallet.repository.AccountRepository;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -30,6 +33,8 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final SecurityUtil securityUtil;
     private final WalletService walletService;
+    private final TransactionEventProducer eventProducer;
+
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void transfer(UUID receiverAccountId, BigDecimal amount, String idempotencyKey) {
 
@@ -81,5 +86,18 @@ public class TransactionService {
         transactionRepository.save(transaction);
         walletService.invalidateBalanceCache(sender.getId());
         walletService.invalidateBalanceCache(receiver.getId());
+
+        TransactionEvent event = TransactionEvent.builder()
+                .transactionId(transaction.getId())
+.senderAccountId(sender.getId())
+                .receiverAccountId(receiver.getId())
+
+                .amount(amount)
+                .type(TransactionType.TRANSFER)
+                .timestamp(LocalDateTime.now())
+                .build();
+        eventProducer.publishEvent(event);
     }
 }
+
+
