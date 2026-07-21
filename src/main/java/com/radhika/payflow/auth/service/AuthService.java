@@ -1,5 +1,6 @@
 package com.radhika.payflow.auth.service;
 
+import com.radhika.payflow.audit.annotation.Auditable;
 import com.radhika.payflow.auth.dto.AuthResponse;
 import com.radhika.payflow.auth.dto.LoginRequest;
 import com.radhika.payflow.auth.dto.RegisterRequest;
@@ -26,7 +27,9 @@ public class AuthService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    @Auditable(action="REGISTER")
 @Transactional
+
 public AuthResponse register(RegisterRequest request){
 
     if(userRepository.findByEmail(request.getEmail()).isPresent()){
@@ -54,7 +57,7 @@ User savedUser=userRepository.save(user);
             .build();
 
 }
-
+@Auditable(action="LOGIN")
 public AuthResponse login(LoginRequest request){
     User user=userRepository.findByEmail(request.getEmail())
             .orElseThrow(()->new InvalidCredentialsException("Invalid email or password"));

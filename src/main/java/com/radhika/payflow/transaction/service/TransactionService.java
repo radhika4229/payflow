@@ -1,4 +1,5 @@
 package com.radhika.payflow.transaction.service;
+import com.radhika.payflow.audit.annotation.Auditable;
 import com.radhika.payflow.auth.entity.User;
 import com.radhika.payflow.common.exception.DuplicateRequestException;
 import com.radhika.payflow.common.exception.InsufficientBalanceException;
@@ -34,7 +35,7 @@ public class TransactionService {
     private final SecurityUtil securityUtil;
     private final WalletService walletService;
     private final TransactionEventProducer eventProducer;
-
+@Auditable(action="TRANSFER")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void transfer(UUID receiverAccountId, BigDecimal amount, String idempotencyKey) {
 

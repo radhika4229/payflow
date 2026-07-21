@@ -1,5 +1,6 @@
 package com.radhika.payflow.wallet.service;
 
+import com.radhika.payflow.audit.annotation.Auditable;
 import com.radhika.payflow.auth.entity.User;
 import com.radhika.payflow.common.exception.DuplicateRequestException;
 import com.radhika.payflow.common.exception.ResourceNotFoundException;
@@ -49,6 +50,7 @@ public BalanceResponse getBalance(){
             .balance(account.getBalance())
             .build();
 }
+@Auditable(action="ADD_MONEY")
 @Transactional(isolation= Isolation.SERIALIZABLE)
 public BalanceResponse addMoney(BigDecimal amount, String idempotencyKey){
 if(transactionRepository.findByIdempotencyKey(idempotencyKey).isPresent()){
